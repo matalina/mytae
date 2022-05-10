@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+console.log('Starting game builds...');
+const { readdirSync } = require('fs')
+
+const getDirectories = source =>
+  readdirSync(source, { withFileTypes: true })
+    .filter(dirent => dirent.isDirectory())
+    .map(dirent => dirent.name);
+
+const getMarkdown = source =>
+  readdirSync(source, { withFileTypes: true })
+    .filter(dirent => dirent.name.split('.').pop() === 'md')
+    .map(dirent => dirent.name);
+
+const fs = require('fs');
+const fm = require('front-matter');
+
+
+const args = require('minimist')(process.argv.slice(2));
+let games = [];
+
+if(args.length) { 
+  games.push(args.game)
+} else {
+  games = getDirectories('./games');
+}
+
+function setupGame(game) {
+  // make directories if needed
+  if (!fs.existsSync('./public/games')) {
+    fs.mkdirSync('./public/games');
+  }
+  if (!fs.existsSync(`./public/games/${game}`)) {
+    fs.mkdirSync(`./public/games/${game}`);
+  }
+}
+
+games.forEach(async (game) => {
+  const start = require(`./games/${game}/game.json`);
+  console.log(`Building game ${start.title} v${start.version}`);
+
+  setupGame(game);
+  fs.writeFileSync(`./public/games/${game}/game.json`, JSON.stringify(start, null, 2));
+
+  const objectTypes = [ 'rooms' ];  //'items', 'npcs', 'exits' ];
+  objectTypes.forEach(objectType => {
+    const objs = buildGameObjectFiles(game, objectType);
+    fs.writeFileSync(`./public/games/${game}/${objectType}.json`, JSON.stringify(objs, null, 2));
+    console.log(`Building ${objectType} complete.`);
+  });
+  
+});
+
+function buildGameObjectFiles(game, objectType) {
+  const objs = getMarkdown(`./games/${game}/${objectType}`);
+  let output = {};
+  objs.forEach((obj) => {
+    console.log(`Building ${objectType} ${obj}`);
+    const content = fs.readFileSync(`./games/${game}/${objectType}/${obj}`, 'utf8');
+    const data = fm(content);
+    output[data.attributes.id] = { body: data.body, attributes: data.attributes };
+  });
+  return output;
+}

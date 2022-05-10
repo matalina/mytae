@@ -1,0 +1,31 @@
+{
+  "001": {
+    "body": "# Room 001\n\nI am a description of the room 1.",
+    "attributes": {
+      "name": "Room 1",
+      "id": "001",
+      "exits": {
+        "north": "002"
+      },
+      "items": [
+        "sword",
+        "stone"
+      ],
+      "npcs": []
+    }
+  },
+  "002": {
+    "body": "# Room 002\n\nI am a description of the room 2.",
+    "attributes": {
+      "name": "Room 2",
+      "id": "002",
+      "exits": {
+        "south": "001"
+      },
+      "items": [
+        "throne"
+      ],
+      "npcs": []
+    }
+  }
+}

@@ -1,0 +1,11 @@
+import { roomCommands } from './objects/room';
+
+export interface Command {
+  verb: string;
+  on: string | string[];
+  args: string[];
+}
+
+export const commands = {
+  room: roomCommands,
+};
